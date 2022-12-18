@@ -102,19 +102,21 @@ public class ActivityPanel extends JPanel {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 // Verifica se una finestra di dialogo per le recensioni è già aperta
-                if (!reviewDialogOpened) {
-                    // Imposta reviewDialogOpened su true per indicare che la finestra di dialogo è aperta
-                    reviewDialogOpened = true;
+                if(!e.getValueIsAdjusting()) {
+                    if (!reviewDialogOpened) {
+                        // Imposta reviewDialogOpened su true per indicare che la finestra di dialogo è aperta
 
-                    // Ottieni l'indice della riga selezionata nella tabella delle attività
-                    int selectedRow = activityTable.getSelectedRow();
-                    if (selectedRow >= 0) {
-                        // Ottieni l'attività selezionata dal modello della tabella
-                        Activity selectedActivity = activityTableModel.getActivityAt(selectedRow);
+                        // Ottieni l'indice della riga selezionata nella tabella delle attività
+                        int selectedRow = activityTable.getSelectedRow();
+                        if (selectedRow >= 0) {
+                            reviewDialogOpened = true;
+                            // Ottieni l'attività selezionata dal modello della tabella
+                            Activity selectedActivity = activityTableModel.getActivityAt(selectedRow);
 
-                        // Mostra la finestra di dialogo con la tabella delle recensioni
-                        ReviewDialog dialog = new ReviewDialog(ActivityPanel.this, selectedActivity.getReviewList(), activityTable);
-                        dialog.setVisible(true);
+                            // Mostra la finestra di dialogo con la tabella delle recensioni
+                            ReviewDialog dialog = new ReviewDialog(ActivityPanel.this, selectedActivity.getReviewList(), activityTable);
+                            dialog.setVisible(true);
+                        }
                     }
                 }
             }
