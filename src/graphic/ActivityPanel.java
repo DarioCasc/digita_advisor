@@ -4,6 +4,8 @@ import entities.Advisor;
 import entities.Review;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,9 +16,12 @@ public class ActivityPanel extends JPanel {
 
     // Advisor che contiene la lista di attività
     Advisor advisor = new Advisor();
+    boolean reviewDialogOpened = false;
 
     // Modello per la tabella che mostra le attività
-    private ActivityTableModel tableModel;
+    private ActivityTableModel activityTableModel;
+    // Modello per la tabella che mostra le recensioni di un'attività selezionata
+    private ReviewTableModel reviewTableModel;
 
     // Costruttore
     public ActivityPanel() {
@@ -26,12 +31,12 @@ public class ActivityPanel extends JPanel {
         // Imposta il layout del pannello
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-        // Crea il modello per la tabella e la tabella stessa
-        tableModel = new ActivityTableModel(advisor);
-        JTable table = new JTable(tableModel);
+        // Crea il modello per la tabella delle attività e la tabella stessa
+        activityTableModel = new ActivityTableModel(advisor);
+        JTable activityTable = new JTable(activityTableModel);
 
         // Aggiungi la tabella al pannello
-        add(new JScrollPane(table));
+        add(new JScrollPane(activityTable));
 
         // Crea un pannello per i pulsanti
         JPanel buttonPanel = new JPanel();
@@ -79,7 +84,7 @@ public class ActivityPanel extends JPanel {
                 }
 
                 // Aggiorna il modello della tabella utilizzando la lista delle attività filtrata
-                tableModel.updateActivities(filteredActivities);
+                activityTableModel.updateActivities(filteredActivities);
             }
         });
 
@@ -91,13 +96,36 @@ public class ActivityPanel extends JPanel {
 
         // Aggiungi il pannello dei pulsanti al pannello principale
         add(buttonPanel);
+
+        // Aggiungi un listener alla tabella delle attività per rilevare quando viene selezionata una nuova attività
+        activityTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                // Verifica se una finestra di dialogo per le recensioni è già aperta
+                if (!reviewDialogOpened) {
+                    // Imposta reviewDialogOpened su true per indicare che la finestra di dialogo è aperta
+                    reviewDialogOpened = true;
+
+                    // Ottieni l'indice della riga selezionata nella tabella delle attività
+                    int selectedRow = activityTable.getSelectedRow();
+                    if (selectedRow >= 0) {
+                        // Ottieni l'attività selezionata dal modello della tabella
+                        Activity selectedActivity = activityTableModel.getActivityAt(selectedRow);
+
+                        // Mostra la finestra di dialogo con la tabella delle recensioni
+                        ReviewDialog dialog = new ReviewDialog(ActivityPanel.this, selectedActivity.getReviewList(), activityTable);
+                        dialog.setVisible(true);
+                    }
+                }
+            }
+        });
     }
 
     // Aggiunge una nuova attività alla lista delle attività
     public void addActivity(Activity activity) {
         advisor.addActivity(activity);
         // Aggiorna il modello della tabella per mostrare la nuova attività nella tabella
-        tableModel.fireTableDataChanged();
+        activityTableModel.fireTableDataChanged();
     }
 
     // Aggiunge una recensione ad una attività esistente
@@ -105,6 +133,6 @@ public class ActivityPanel extends JPanel {
         Activity activity = advisor.getActivityList().get(activityIndex);
         activity.addReview(review);
         // Aggiorna il modello della tabella per mostrare il nuovo punteggio dell'attività nella tabella
-        tableModel.fireTableDataChanged();
+        activityTableModel.fireTableDataChanged();
     }
 }

@@ -9,22 +9,27 @@ import java.util.List;
 
 public class ActivityTableModel extends AbstractTableModel {
 
-    Advisor advisor;
+    private Advisor advisor;
+    private List<Activity> activities;
 
     public ActivityTableModel(Advisor advisor) {
         this.advisor = advisor;
+        this.activities = advisor.getActivityList();
     }
 
     // Aggiorna la lista delle attività mostrate nella tabella
     public void updateActivities(List<Activity> activities) {
-        advisor.setActivityList(new ArrayList<Activity>());
-        advisor.getActivityList().addAll(activities);
-        fireTableDataChanged();
+       this.activities = activities;
+       fireTableDataChanged();
+    }
+
+    public Activity getActivityAt(int rowIndex) {
+        return activities.get(rowIndex);
     }
 
     @Override
     public int getRowCount() {
-        return advisor.getActivityList().size();
+        return activities.size();
     }
 
     @Override
@@ -34,7 +39,7 @@ public class ActivityTableModel extends AbstractTableModel {
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        Activity activity = advisor.getActivityList().get(rowIndex);
+        Activity activity = activities.get(rowIndex);
         switch (columnIndex) {
             case 0:
                 return activity.getName();
